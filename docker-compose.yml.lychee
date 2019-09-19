@@ -1,0 +1,53 @@
+version: "3.3"
+
+services:
+
+
+
+  lychee:
+    image: linuxserver/lychee
+    labels:
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.lychee.rule=Host(`lychee.moraud.xyz`)"
+      - "traefik.http.routers.lychee.entrypoints=websecure"
+      - "traefik.http.routers.lychee.tls.certresolver=myhttpchallenge"
+      - traefik.docker.network=lychee
+
+      - "traefik.http.routers.lychee-http.rule=Host(`lychee.moraud.xyz`)"
+      - "traefik.http.routers.lychee-http.entrypoints=web"
+
+      - traefik.http.routers.lychee-http.middlewares=lychee-redirect
+      - traefik.http.middlewares.lychee-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.lychee-redirect.redirectscheme.permanent=true
+
+    container_name: lychee
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+    volumes:
+      - ./config:/config
+      - ./pictures:/pictures
+    restart: unless-stopped
+
+
+
+  db:
+    image: mariadb
+    container_name: lychee_db
+    restart: unless-stopped
+    volumes:
+     - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: lychee
+      MYSQL_DATABASE: lychee
+      MYSQL_USER: lychee
+      MYSQL_PASSWORD: lychee
+    labels:
+      - "traefik.enable=true"
+      - traefik.docker.network=lychee
+
+
+
+
