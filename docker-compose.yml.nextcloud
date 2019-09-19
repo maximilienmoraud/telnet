@@ -1,0 +1,42 @@
+version: "3.3"
+
+services:
+
+  db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    container_name: nextcloud_db
+    labels:
+      - "traefik.enable=true"
+      - traefik.docker.network=nextcloud   
+
+  nextcloud:
+    image: nextcloud
+    volumes:
+      - ./data:/var/www/html
+    restart: always
+    labels:
+    
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.moraud.xyz`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls.certresolver=myhttpchallenge"
+      - traefik.docker.network=nextcloud
+
+      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.moraud.xyz`)"
+      - "traefik.http.routers.nextcloud-http.entrypoints=web"
+
+      - traefik.http.routers.nextcloud-http.middlewares=nextcloud-redirect
+      - traefik.http.middlewares.nextcloud-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.nextcloud-redirect.redirectscheme.permanent=true
+
+    container_name: nextcloud
+
