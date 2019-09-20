@@ -3,11 +3,11 @@ version: "3.3"
 services:
 
   
-  apache_site1:
-    container_name: LAMP_apache
-    image: 'bitnami/apache:latest'
+  nginx_site1:
+    container_name: nginx_site1
+    image: wodby/nginx:latest
     volumes:
-      - ./www:/app
+      - ./www:/var/www/html
     depends_on:
       - php_site1
     labels:
@@ -23,17 +23,16 @@ services:
       - traefik.http.routers.site1-http.middlewares=site1-redirect
       - traefik.http.middlewares.site1-redirect.redirectscheme.scheme=https
       - traefik.http.middlewares.site1-redirect.redirectscheme.permanent=true
-    container_name: apache_site1
 
   db_site1:
     image: mariadb:latest
-    container_name: LAMP_mariaDB
+    container_name: db_site1
     volumes:
       - ./database:/var/lib/mysql:rw
     depends_on:
-      - apache_site1
+      - nginx_site1
     environment:
-      - MYSQL_ROOT_PASSWORD=lamp
+      - MYSQL_ROOT_PASSWORD=lemp
     labels:
       - "traefik.enable=true"
       - traefik.docker.network=site1
@@ -41,19 +40,19 @@ services:
 
 
   php_site1:
-    image: php:7-fpm-alpine
-    container_name: LAMP_php
+    image: wodby/php:latest
+    container_name: LEMP_php
     volumes:
-      -/www:/app
+      - ./www:/var/www/html
     labels:
       - "traefik.enable=true"
       - traefik.docker.network=site1
     container_name: php_site1
 
 
-  phpmyadmin:
+  phpmyadmin_site1:
     image: phpmyadmin/phpmyadmin
-    container_name: LAMP_phpMyAdmin
+    container_name: phpmyadmin_site1
     environment:
       PMA_ARBITRARY: 1
     depends_on:
@@ -71,7 +70,5 @@ services:
       - traefik.http.routers.site1-http-phpmyadmin.middlewares=site1-redirect-phpmyadmin
       - traefik.http.middlewares.site1-redirect-phpmyadmin.redirectscheme.scheme=https
       - traefik.http.middlewares.site1-redirect-phpmyadmin.redirectscheme.permanent=true
-    container_name: phpmyadmin_site1
-
 
 
