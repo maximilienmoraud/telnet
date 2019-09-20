@@ -1,0 +1,77 @@
+version: "3.3"
+
+services:
+
+  
+  apache_site1:
+    container_name: LAMP_apache
+    image: 'bitnami/apache:latest'
+    volumes:
+      - ./www:/var/www/html
+    depends_on:
+      - php_site1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.site1.rule=Host(`site1.moraud.xyz`)"
+      - "traefik.http.routers.site1.entrypoints=websecure"
+      - "traefik.http.routers.site1.tls.certresolver=myhttpchallenge"
+      - traefik.docker.network=site1
+
+      - "traefik.http.routers.site1-http.rule=Host(`site1.moraud.xyz`)"
+      - "traefik.http.routers.site1-http.entrypoints=web"
+
+      - traefik.http.routers.site1-http.middlewares=site1-redirect
+      - traefik.http.middlewares.site1-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.site1-redirect.redirectscheme.permanent=true
+    container_name: apache_site1
+
+  db_site1:
+    image: mariadb:latest
+    container_name: LAMP_mariaDB
+    volumes:
+      - ./database:/var/lib/mysql:rw
+    depends_on:
+      - apache_site1
+    environment:
+      - MYSQL_ROOT_PASSWORD=lamp
+    labels:
+      - "traefik.enable=true"
+      - traefik.docker.network=site1
+    container_name: db_site1
+
+
+  php_site1:
+    image: php:7-fpm-alpine
+    container_name: LAMP_php
+    volumes:
+      - ./code:/code
+    labels:
+      - "traefik.enable=true"
+      - traefik.docker.network=site1
+    container_name: php_site1
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: LAMP_phpMyAdmin
+    environment:
+      PMA_ARBITRARY: 1
+    depends_on:
+      - db_site1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.site1-phpmyadmin.rule=Host(`site1-phpmyadmin.moraud.xyz`)"
+      - "traefik.http.routers.site1-phpmyadmin.entrypoints=websecure"
+      - "traefik.http.routers.site1-phpmyadmin.tls.certresolver=myhttpchallenge"
+      - traefik.docker.network=site1
+
+      - "traefik.http.routers.site1-http-phpmyadmin.rule=Host(`site1-phpmyadmin.moraud.xyz`)"
+      - "traefik.http.routers.site1-http-phpmyadmin.entrypoints=web"
+
+      - traefik.http.routers.site1-http-phpmyadmin.middlewares=site1-redirect-phpmyadmin
+      - traefik.http.middlewares.site1-redirect-phpmyadmin.redirectscheme.scheme=https
+      - traefik.http.middlewares.site1-redirect-phpmyadmin.redirectscheme.permanent=true
+    container_name: phpmyadmin_site1
+
+
+
