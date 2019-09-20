@@ -41,7 +41,6 @@ services:
 
   php_site1:
     image: wodby/php:latest
-    container_name: LEMP_php
     volumes:
       - ./www:/var/www/html
     labels:
