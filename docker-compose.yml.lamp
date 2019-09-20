@@ -44,7 +44,7 @@ services:
     image: php:7-fpm-alpine
     container_name: LAMP_php
     volumes:
-      - ./code:/code
+      -/www:/var/www/html
     labels:
       - "traefik.enable=true"
       - traefik.docker.network=site1
