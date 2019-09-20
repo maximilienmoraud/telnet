@@ -7,7 +7,7 @@ services:
     container_name: LAMP_apache
     image: 'bitnami/apache:latest'
     volumes:
-      - ./www:/var/www/html
+      - ./www:/app
     depends_on:
       - php_site1
     labels:
@@ -44,7 +44,7 @@ services:
     image: php:7-fpm-alpine
     container_name: LAMP_php
     volumes:
-      -/www:/var/www/html
+      -/www:/app
     labels:
       - "traefik.enable=true"
       - traefik.docker.network=site1
