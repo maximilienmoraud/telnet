@@ -30,6 +30,8 @@ services:
       - ./config:/config
       - ./pictures:/pictures
     restart: unless-stopped
+    networks:
+      - web
 
 
 
@@ -48,6 +50,9 @@ services:
       - "traefik.enable=true"
       - traefik.docker.network=lychee
 
+networks:
+  web:
+    external: true
 
 
 
