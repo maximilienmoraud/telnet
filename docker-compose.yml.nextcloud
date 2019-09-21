@@ -14,9 +14,9 @@ services:
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
     container_name: nextcloud_db
-    labels:
-      - "traefik.enable=true"
-      - traefik.docker.network=nextcloud   
+    networks:
+      - internal
+
 
   nextcloud:
     image: nextcloud
@@ -29,7 +29,7 @@ services:
       - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.moraud.xyz`)"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
       - "traefik.http.routers.nextcloud.tls.certresolver=myhttpchallenge"
-      - traefik.docker.network=nextcloud
+      - traefik.docker.network=web
 
       - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.moraud.xyz`)"
       - "traefik.http.routers.nextcloud-http.entrypoints=web"
@@ -37,6 +37,14 @@ services:
       - traefik.http.routers.nextcloud-http.middlewares=nextcloud-redirect
       - traefik.http.middlewares.nextcloud-redirect.redirectscheme.scheme=https
       - traefik.http.middlewares.nextcloud-redirect.redirectscheme.permanent=true
-
     container_name: nextcloud
+    
+    networks:
+      - internal
+      - web
+
+networks:
+  internal:
+  web:
+    external: true
 
