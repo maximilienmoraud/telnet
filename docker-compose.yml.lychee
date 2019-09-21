@@ -12,7 +12,7 @@ services:
       - "traefik.http.routers.lychee.rule=Host(`lychee.moraud.xyz`)"
       - "traefik.http.routers.lychee.entrypoints=websecure"
       - "traefik.http.routers.lychee.tls.certresolver=myhttpchallenge"
-      - traefik.docker.network=lychee
+      - traefik.docker.network=web
 
       - "traefik.http.routers.lychee-http.rule=Host(`lychee.moraud.xyz`)"
       - "traefik.http.routers.lychee-http.entrypoints=web"
@@ -32,6 +32,7 @@ services:
     restart: unless-stopped
     networks:
       - web
+      - internal
 
 
 
@@ -49,10 +50,14 @@ services:
     labels:
       - "traefik.enable=true"
       - traefik.docker.network=lychee
+    networks:
+      - internal      
+  
 
 networks:
   web:
     external: true
+  internal:
 
 
 
