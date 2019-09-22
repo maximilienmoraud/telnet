@@ -49,9 +49,6 @@ services:
       MYSQL_DATABASE: lychee
       MYSQL_USER: lychee
       MYSQL_PASSWORD: lychee
-    labels:
-      - "traefik.enable=true"
-      - traefik.docker.network=lychee
     networks:
       - internal      
   
