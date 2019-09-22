@@ -39,7 +39,6 @@ services:
       - "traefik.http.routers.whoami.tls.certresolver=myhttpchallenge"
       
 networks:
-  internal:
   web:
     external: true
 
