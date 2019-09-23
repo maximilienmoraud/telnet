@@ -1,0 +1,33 @@
+
+version: '3'
+services:
+ bitwarden:
+  image: bitwardenrs/server
+  restart: always
+  volumes:
+      - ./bw-data/:/data/
+  environment:
+      - WEBSOCKET_ENABLED=true
+  labels:
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.moraud.xyz`)"
+      - "traefik.http.routers.bitwarden.entrypoints=websecure"
+      - "traefik.http.routers.bitwarden.tls.certresolver=myhttpchallenge"
+      - traefik.docker.network=web
+
+      - "traefik.http.routers.bitwarden-http.rule=Host(`bitwarden.moraud.xyz`)"
+      - "traefik.http.routers.bitwarden-http.entrypoints=web"
+
+      - traefik.http.routers.bitwarden-http.middlewares=bitwarden-redirect
+      - traefik.http.middlewares.bitwarden-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.bitwarden-redirect.redirectscheme.permanent=true
+
+  networks:
+     - web
+     
+     
+    
+networks:
+  web:
+    external: true
