@@ -2,14 +2,14 @@ version: "3.3"
 
 services:
 
-  
-  nginx_site1:
+
+  nginx:
     container_name: nginx_site1
     image: wodby/nginx:latest
     volumes:
       - ./www:/var/www/html
     depends_on:
-      - php_site1
+      - php
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.site1.rule=Host(`site1.moraud.xyz`)"
@@ -23,18 +23,21 @@ services:
       - traefik.http.routers.site1-http.middlewares=site1-redirect
       - traefik.http.middlewares.site1-redirect.redirectscheme.scheme=https
       - traefik.http.middlewares.site1-redirect.redirectscheme.permanent=true
+    environment:
+      NGINX_BACKEND_HOST: php
+      NGINX_VHOST_PRESET: php
+      NGINX_STATIC_OPEN_FILE_CACHE: "off"
     networks:
       - internal
       - web
 
-
-  db_site1:
+  db:
     image: mariadb:latest
     container_name: db_site1
     volumes:
       - ./database:/var/lib/mysql:rw
     depends_on:
-      - nginx_site1
+      - nginx
     environment:
       - MYSQL_ROOT_PASSWORD=lemp
     labels:
@@ -44,24 +47,25 @@ services:
     networks:
       - internal
 
-  php_site1:
+  php:
     image: wodby/php:latest
     volumes:
       - ./www:/var/www/html
     labels:
       - "traefik.enable=true"
       - traefik.docker.network=site1
+      
     container_name: php_site1
     networks:
       - internal
 
-  phpmyadmin_site1:
+  phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin_site1
     environment:
       PMA_ARBITRARY: 1
     depends_on:
-      - db_site1
+      - db
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.site1-phpmyadmin.rule=Host(`site1-phpmyadmin.moraud.xyz`)"
