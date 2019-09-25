@@ -1,0 +1,32 @@
+version: '2'
+services:
+  dokuwiki:
+    image: 'bitnami/dokuwiki:0'
+    volumes:
+      - ./data:/bitnami'
+    labels:
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.wiki.rule=Host(`wiki.moraud.xyz`)"
+      - "traefik.http.routers.wiki.entrypoints=websecure"
+      - "traefik.http.routers.wiki.tls.certresolver=myhttpchallenge"
+      - traefik.docker.network=web
+
+      - "traefik.http.routers.wiki-http.rule=Host(`wiki.moraud.xyz`)"
+      - "traefik.http.routers.wiki-http.entrypoints=web"
+
+      - traefik.http.routers.wiki-http.middlewares=wiki-redirect
+      - traefik.http.middlewares.wiki-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.wiki-redirect.redirectscheme.permanent=true
+
+    networks:
+     - web
+    container_name: wiki
+    environment:
+     - DOKUWIKI_PASSWORD=dokuwiki
+     - DOKUWIKI_USERNAME=dokuwiki
+     - DOKUWIKI_WIKI_NAME=dokuwiki
+
+networks:
+  web:
+    external: true
